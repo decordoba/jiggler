@@ -17,6 +17,7 @@ def jiggler(
     end_time = (time.time() + duration * 60) if duration else None
     last_pos = pyautogui.position()
     while True:
+        start_time = time.time()
         current_pos = pyautogui.position()
         if current_pos == last_pos or not only_if_idle:
             if verbose:
@@ -47,13 +48,14 @@ def jiggler(
         elif verbose:
             print(f"\nJiggle skipped (no idle) at {time.strftime('%H:%M:%S')}")
         last_pos = pyautogui.position()
+        time_used = time.time() - start_time
         if end_time:
             remaining = end_time - time.time()
             if remaining <= 0:
                 break
-            time.sleep(min(period, remaining))
+            time.sleep(min(period - time_used, remaining))
         else:
-            time.sleep(period)
+            time.sleep(period - time_used)
 
 
 if __name__ == "__main__":
