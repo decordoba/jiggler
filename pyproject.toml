@@ -1,0 +1,9 @@
+[project]
+name = "jiggler"
+version = "0.1.0"
+description = "Script to keep your computer awake by making small periodic mouse movements."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyautogui>=0.9.54",
+]
