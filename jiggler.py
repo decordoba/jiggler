@@ -34,10 +34,10 @@ def jiggler(
                     (1, 0),
                 ]:
                     try:
-                        posX, posY = pyautogui.position()
-                        newX = posX + x * jiggle_distance
-                        newY = posY + y * jiggle_distance
-                        pyautogui.moveTo(newX, newY)
+                        pos_x, pos_y = pyautogui.position()
+                        new_x = pos_x + x * jiggle_distance
+                        new_y = pos_y + y * jiggle_distance
+                        pyautogui.moveTo(new_x, new_y, duration=0.0)
                     except pyautogui.FailSafeException:
                         pass
             if not no_shift:
@@ -53,9 +53,9 @@ def jiggler(
             remaining = end_time - time.time()
             if remaining <= 0:
                 break
-            time.sleep(min(period - time_used, remaining))
+            time.sleep(max(min(period - time_used, remaining), 0))
         else:
-            time.sleep(period - time_used)
+            time.sleep(max(period - time_used, 0))
 
 
 if __name__ == "__main__":
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         help="Enable verbose output, print each jiggle action",
     )
     args = parser.parse_args()
-    period = args.period
+    period = args.period if args.period > 0 else 120
     duration = args.duration if args.duration and args.duration > 0 else None
     no_shift = args.no_shift
     no_jiggle = args.no_jiggle
