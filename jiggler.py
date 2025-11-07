@@ -3,6 +3,35 @@ import time
 import pyautogui
 
 
+class JiggleTracker:
+    """Track the number of jiggles and skips, and the elapsed time."""
+
+    def __init__(self):
+        """Initialize the tracker."""
+        self.jiggles = 0
+        self.skips = 0
+        self.start_time = time.time()
+
+    def increment(self, skip: bool = False) -> None:
+        """Increment the jiggle or skip count."""
+        if skip:
+            self.skips += 1
+        else:
+            self.jiggles += 1
+
+    def get_stats(self) -> str:
+        """Get a formatted string of the jiggle statistics."""
+        elapsed = time.time() - self.start_time
+        hours, rem = divmod(elapsed, 3600)
+        minutes, seconds = divmod(rem, 60)
+        time_str = f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+        jiggles_str = f"{self.jiggles} jiggle{'s' if self.jiggles != 1 else ''}"
+        skips_str = (
+            f" and {self.skips} skip{'s' if self.skips != 1 else ''}" if self.skips > 0 else ""
+        )
+        return f"{jiggles_str}{skips_str}, {time_str} elapsed"
+
+
 def jiggler(
     period: int = 60,
     duration: int | None = None,
@@ -12,6 +41,7 @@ def jiggler(
     jiggle_distance: int = 2,
     shift_count: int = 3,
     verbose: bool = False,
+    tracker: JiggleTracker | None = None,
 ) -> None:
     """Jiggle the mouse every `period` seconds for `duration` minutes to prevent screen lock."""
     end_time = (time.time() + duration * 60) if duration else None
@@ -22,6 +52,8 @@ def jiggler(
         if current_pos == last_pos or not only_if_idle:
             if verbose:
                 print(f"\nJiggling mouse ({jiggle_distance}px) at {time.strftime('%H:%M:%S')}")
+            if tracker:
+                tracker.increment()
             if not no_jiggle:
                 for x, y in [
                     (1, 0),
@@ -45,8 +77,13 @@ def jiggler(
                     print(f"Pressing Shift (x{shift_count}) at {time.strftime('%H:%M:%S')}")
                 for _ in range(shift_count):
                     pyautogui.press("shift")
-        elif verbose:
-            print(f"\nJiggle skipped (no idle) at {time.strftime('%H:%M:%S')}")
+
+        else:
+            if verbose:
+                print(f"\nJiggle skipped (no idle) at {time.strftime('%H:%M:%S')}")
+            if tracker:
+                tracker.increment(skip=True)
+
         last_pos = pyautogui.position()
         time_used = time.time() - start_time
         if end_time:
@@ -114,6 +151,7 @@ if __name__ == "__main__":
     only_if_idle = not args.constant_jiggle
     jiggle_distance = args.jiggle_distance
     verbose = args.verbose
+    tracker = JiggleTracker()
 
     duration_text = ""
     if duration is not None:
@@ -134,3 +172,6 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         pass
+
+    finally:
+        print(f"\nStopped after {tracker.get_stats()}")

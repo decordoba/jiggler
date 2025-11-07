@@ -51,6 +51,15 @@
     "--strict"
   ],
 
+  // Ignore workspace folders for indexing
+  "python.analysis.exclude": [".venv"],
+  "files.exclude": {
+    "**/.venv": true
+  },
+  "search.exclude": {
+    "**/.venv": true
+  },
+
   // Misc
   "python.analysis.typeCheckingMode": "strict",  // show type issues
   "files.trimTrailingWhitespace": true,
